@@ -4,4 +4,4 @@ setup:
 watch:
 	reflex -r 
 
-.PHONY: setup
+.PHONY: setup watch
