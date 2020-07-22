@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
-	"github/rssh-jp/api-test/go/domain"
+	"github.com/rssh-jp/test-mng/api/domain"
 )
 
-type userUsercase struct {
+type userUsecase struct {
 	userRepo domain.UserRepository
 }
 

@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"context"
+
 	"github.com/rssh-jp/test-mng/api/domain"
 )
 
@@ -29,7 +31,7 @@ func NewUserMysqlMockRepository() domain.UserRepository {
 	return &userRepository{}
 }
 
-func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (User, error) {
+func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (domain.User, error) {
 	if user, ok := hash[id+":"+password]; ok {
 		return user, nil
 	} else {

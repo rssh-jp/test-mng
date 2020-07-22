@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/rssh-jp/test-mng/api/domain"
@@ -19,7 +20,7 @@ func NewUserMysqlRepository(conn *sql.DB, opts ...Option) domain.UserRepository 
 	}
 
 	if conf.isMock {
-		return mocks.NewUserMysqlMockRepository()
+		return mock.NewUserMysqlMockRepository()
 	} else {
 		return &userRepository{
 			conn: conn,
@@ -28,6 +29,6 @@ func NewUserMysqlRepository(conn *sql.DB, opts ...Option) domain.UserRepository 
 
 }
 
-func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (User, error) {
+func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (domain.User, error) {
 	return domain.User{}, nil
 }

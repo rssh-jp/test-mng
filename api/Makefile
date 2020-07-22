@@ -1,7 +1,10 @@
 setup:
 	go get github.com/cespare/reflex
 
-watch:
-	reflex -r 
+run:
+	cd app/http/ && go run main.go
 
-.PHONY: setup watch
+watch:
+	reflex -s -r '\.go$$' make run
+
+.PHONY: setup run watch
