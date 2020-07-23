@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"log"
 	"math/rand"
 
 	"github.com/rssh-jp/test-mng/api/domain"
@@ -35,14 +34,13 @@ func NewUserUsecase(ur domain.UserRepository, tr domain.TokenRepository) domain.
 
 func (u *userUsecase) Login(ctx context.Context, id, password string) (domain.Token, error) {
 	user, err := u.userRepo.GetByIDPassword(ctx, id, password)
-	log.Println(user, err)
 	if err != nil {
 		return domain.Token{}, err
 	}
 
 	t := newToken()
 	token := domain.Token{
-		ID:    id,
+		ID:    user.ID,
 		Token: string(t[:]),
 	}
 

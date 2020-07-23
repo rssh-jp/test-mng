@@ -14,7 +14,7 @@ var (
 func init() {
 	hash = make(map[string]*domain.User)
 	hash["test:test"] = &domain.User{
-		ID:   "test-id",
+		ID:   "test",
 		Name: "test-name",
 		Age:  32,
 	}
@@ -35,7 +35,6 @@ func NewUserMysqlMockRepository() domain.UserRepository {
 
 func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (domain.User, error) {
 	key := id + ":" + password
-	log.Println("key:", key)
 	if user, ok := hash[key]; ok {
 		return *user, nil
 	} else {
