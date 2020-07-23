@@ -7,4 +7,7 @@ run:
 watch:
 	reflex -s -r '\.go$$' make run
 
-.PHONY: setup run watch
+test:
+	cd app/http/ && go test -v
+
+.PHONY: setup run watch test
