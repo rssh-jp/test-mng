@@ -6,4 +6,5 @@ import (
 
 var (
 	ErrNotFound = errors.New("Not found")
+	ErrInvalid  = errors.New("Invalid")
 )
