@@ -9,4 +9,5 @@ require (
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/ogier/pflag v0.0.1 // indirect
+	github.com/spf13/viper v1.7.0
 )
