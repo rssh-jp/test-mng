@@ -4,7 +4,8 @@ import (
 	"log"
 
 	delivery "github.com/rssh-jp/test-mng/api/delivery/http"
-	repo "github.com/rssh-jp/test-mng/api/repository/mysql"
+	mysqlRepo "github.com/rssh-jp/test-mng/api/repository/mysql"
+	redisRepo "github.com/rssh-jp/test-mng/api/repository/redis"
 	usecase "github.com/rssh-jp/test-mng/api/usecase"
 
 	"github.com/labstack/echo/v4"
@@ -13,8 +14,9 @@ import (
 func main() {
 	e := echo.New()
 
-	ur := repo.NewUserMysqlRepository(nil, repo.OptionIsMock())
-	uu := usecase.NewUserUsecase(ur)
+	ur := mysqlRepo.NewUserMysqlRepository(nil, mysqlRepo.OptionIsMock())
+	tr := redisRepo.NewTokenRedisRepository(redisRepo.OptionIsMock())
+	uu := usecase.NewUserUsecase(ur, tr)
 	delivery.NewUserHandler(e, uu)
 
 	log.Fatal(e.Start(":1323"))

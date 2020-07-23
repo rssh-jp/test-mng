@@ -2,25 +2,61 @@ package usecase
 
 import (
 	"context"
+	"log"
+	"math/rand"
 
 	"github.com/rssh-jp/test-mng/api/domain"
 )
 
+const (
+	validString = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-^\!"#$%&'()=~|@[{;:]+*},./\<>?_`
+	length      = 32
+)
+
+var (
+	r *rand.Rand
+)
+
+func init() {
+	r = rand.New(rand.NewSource(1))
+}
+
 type userUsecase struct {
-	userRepo domain.UserRepository
+	userRepo  domain.UserRepository
+	tokenRepo domain.TokenRepository
 }
 
-func NewUserUsecase(ur domain.UserRepository) domain.UserUsecase {
+func NewUserUsecase(ur domain.UserRepository, tr domain.TokenRepository) domain.UserUsecase {
 	return &userUsecase{
-		userRepo: ur,
+		userRepo:  ur,
+		tokenRepo: tr,
 	}
 }
 
-func (u *userUsecase) Login(ctx context.Context, id, password string) (domain.User, error) {
+func (u *userUsecase) Login(ctx context.Context, id, password string) (domain.Token, error) {
 	user, err := u.userRepo.GetByIDPassword(ctx, id, password)
+	log.Println(user, err)
 	if err != nil {
-		return domain.User{}, err
+		return domain.Token{}, err
 	}
 
-	return user, nil
+	t := newToken()
+	token := domain.Token{
+		ID:    id,
+		Token: string(t[:]),
+	}
+
+	err = u.tokenRepo.Store(ctx, token)
+	if err != nil {
+		return domain.Token{}, err
+	}
+
+	return token, nil
+}
+
+func newToken() (ret [length]byte) {
+	for i := 0; i < length; i++ {
+		ret[i] = validString[r.Intn(len(validString))]
+	}
+	return
 }

@@ -15,5 +15,5 @@ type UserRepository interface {
 }
 
 type UserUsecase interface {
-	Login(ctx context.Context, id, password string) (User, error)
+	Login(ctx context.Context, id, password string) (Token, error)
 }
