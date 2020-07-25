@@ -52,6 +52,20 @@ func (u *userUsecase) Login(ctx context.Context, id, password string) (domain.To
 	return token, nil
 }
 
+func (u *userUsecase) Fetch(ctx context.Context, token string) ([]domain.User, error) {
+	_, err := u.tokenRepo.GetByToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := u.userRepo.Fetch(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func newToken() (ret [length]byte) {
 	for i := 0; i < length; i++ {
 		ret[i] = validString[r.Intn(len(validString))]

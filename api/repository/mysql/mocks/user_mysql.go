@@ -33,6 +33,16 @@ func NewUserMysqlMockRepository() domain.UserRepository {
 	return &userRepository{}
 }
 
+func (r *userRepository) Fetch(ctx context.Context) ([]domain.User, error) {
+	users := make([]domain.User, 0, len(hash))
+
+	for _, user := range hash {
+		users = append(users, *user)
+	}
+
+	return users, nil
+}
+
 func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (domain.User, error) {
 	key := id + ":" + password
 	if user, ok := hash[key]; ok {

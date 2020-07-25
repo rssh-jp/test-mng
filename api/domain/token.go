@@ -10,6 +10,6 @@ type Token struct {
 }
 
 type TokenRepository interface {
-	GetByID(ctx context.Context, id string) (Token, error)
+	GetByToken(ctx context.Context, token string) (Token, error)
 	Store(ctx context.Context, token Token) error
 }

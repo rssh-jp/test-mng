@@ -25,7 +25,7 @@ func NewTokenRedisRepository(opts ...Option) domain.TokenRepository {
 
 }
 
-func (r *tokenRepository) GetByID(ctx context.Context, id string) (domain.Token, error) {
+func (r *tokenRepository) GetByToken(ctx context.Context, token string) (domain.Token, error) {
 	return domain.Token{}, nil
 }
 
