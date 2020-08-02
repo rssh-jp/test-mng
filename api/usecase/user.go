@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	validString = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-^\!"#$%&'()=~|@[{;:]+*},./\<>?_`
+	validString = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890`
 	length      = 32
 )
 

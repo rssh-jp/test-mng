@@ -25,6 +25,7 @@ func NewTokenRedisMockRepository() domain.TokenRepository {
 
 func (r *tokenRepository) GetByToken(ctx context.Context, token string) (domain.Token, error) {
 	key := token
+
 	if t, ok := hash[key]; ok {
 		return t, nil
 	} else {
