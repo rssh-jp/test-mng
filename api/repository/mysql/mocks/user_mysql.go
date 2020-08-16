@@ -3,6 +3,7 @@ package mock
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/rssh-jp/test-mng/api/domain"
 )
@@ -50,4 +51,16 @@ func (r *userRepository) GetByIDPassword(ctx context.Context, id, password strin
 	} else {
 		return domain.User{}, domain.ErrNotFound
 	}
+}
+
+func (r *userRepository) GetByID(ctx context.Context, id string) (domain.User, error) {
+	for key, user := range hash {
+		_id := strings.Split(key, ":")[0]
+		if _id != id {
+			continue
+		}
+
+		return *user, nil
+	}
+	return domain.User{}, domain.ErrNotFound
 }

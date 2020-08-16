@@ -36,7 +36,7 @@ func TestLogin(t *testing.T) {
 
 		expect := domain.Token{
 			ID:    "test",
-			Token: "J+!N>ip\"asYzQ%Wk#t_upS\\mt#V|w>{i",
+			Token: "BpLnfgDsc3WD9F3qNfHK6a95jjJkwzDk",
 		}
 
 		if !reflect.DeepEqual(expect, actual) {
@@ -96,5 +96,35 @@ func TestUsersFetch(t *testing.T) {
 		}
 
 		t.Log(users)
+	})
+
+	t.Run("usersGetOwn", func(t *testing.T) {
+		r, err := http.Get(ts.URL + "/users/getown?token=" + token)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		defer r.Body.Close()
+
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var actual domain.User
+		err = json.Unmarshal(data, &actual)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		expect := domain.User{
+			ID:   "test",
+			Name: "test-name",
+			Age:  32,
+		}
+
+		if !reflect.DeepEqual(expect, actual) {
+			t.Errorf("Not match response\nexpect: %+v\nactual: %+v", expect, actual)
+		}
 	})
 }

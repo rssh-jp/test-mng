@@ -19,6 +19,7 @@ func NewUserHandler(e *echo.Echo, uu domain.UserUsecase) {
 
 	e.GET("/login", handler.Login)
 	e.GET("/users/fetch", handler.UsersFetch)
+	e.GET("/users/getown", handler.UsersGetOwn)
 }
 
 type recvLogin struct {
@@ -59,6 +60,28 @@ func (h *UserHandler) UsersFetch(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	users, err := h.uu.Fetch(ctx, r.Token)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
+type recvUsersGetOwn struct {
+	Token string `json:"token" form:"token" query:"token"`
+}
+
+func (h *UserHandler) UsersGetOwn(c echo.Context) error {
+	r := new(recvUsersGetOwn)
+
+	err := c.Bind(r)
+	if err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	users, err := h.uu.GetOwn(ctx, r.Token)
 	if err != nil {
 		return err
 	}

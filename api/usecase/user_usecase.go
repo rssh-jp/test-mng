@@ -66,6 +66,20 @@ func (u *userUsecase) Fetch(ctx context.Context, token string) ([]domain.User, e
 	return users, nil
 }
 
+func (u *userUsecase) GetOwn(ctx context.Context, token string) (domain.User, error) {
+	t, err := u.tokenRepo.GetByToken(ctx, token)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	user, err := u.userRepo.GetByID(ctx, t.ID)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
+}
+
 func newToken() (ret [length]byte) {
 	for i := 0; i < length; i++ {
 		ret[i] = validString[r.Intn(len(validString))]

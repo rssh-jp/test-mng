@@ -110,3 +110,30 @@ func (r *userRepository) GetByIDPassword(ctx context.Context, id, password strin
 
 	return users[0], nil
 }
+func (r *userRepository) GetByID(ctx context.Context, id string) (domain.User, error) {
+	query := `
+        SELECT
+            id,
+            name,
+            age
+        FROM
+            users
+        WHERE
+            id = ?
+    `
+
+	args := []interface{}{
+		id,
+	}
+
+	users, err := r.fetch(ctx, query, args...)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	if len(users) != 1 {
+		return domain.User{}, domain.ErrInvalid
+	}
+
+	return users[0], nil
+}
