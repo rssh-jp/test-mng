@@ -44,6 +44,21 @@ func (r *userRepository) Fetch(ctx context.Context) ([]domain.User, error) {
 	return users, nil
 }
 
+func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
+	for key, _ := range hash {
+		id := strings.Split(key, ":")[0]
+		if id != user.ID {
+			continue
+		}
+
+		hash[key] = user
+
+		return nil
+	}
+
+	return domain.ErrNotFound
+}
+
 func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (domain.User, error) {
 	key := id + ":" + password
 	if user, ok := hash[key]; ok {

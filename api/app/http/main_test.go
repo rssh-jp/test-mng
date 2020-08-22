@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -16,27 +17,24 @@ func TestLogin(t *testing.T) {
 	defer ts.Close()
 
 	t.Run("success", func(t *testing.T) {
-		r, err := http.Get(ts.URL + "/login?id=test&password=test")
+		sendData := domain.RecvLogin{
+			ID:       "test",
+			Password: "test",
+		}
+
+		var actual domain.SendLogin
+
+		err := post(ts.URL+"/login", sendData, &actual)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		defer r.Body.Close()
-
-		data, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		var actual domain.Token
-		err = json.Unmarshal(data, &actual)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		expect := domain.Token{
-			ID:    "test",
-			Token: "BpLnfgDsc3WD9F3qNfHK6a95jjJkwzDk",
+		expect := domain.SendLogin{
+			Message: "OK",
+			Token: domain.Token{
+				ID:    "test",
+				Token: "BpLnfgDsc3WD9F3qNfHK6a95jjJkwzDk",
+			},
 		}
 
 		if !reflect.DeepEqual(expect, actual) {
@@ -51,80 +49,145 @@ func TestUsersFetch(t *testing.T) {
 	var token string
 
 	t.Run("login", func(t *testing.T) {
-		r, err := http.Get(ts.URL + "/login?id=test&password=test")
+		sendData := domain.RecvLogin{
+			ID:       "test",
+			Password: "test",
+		}
+
+		var actual domain.SendLogin
+
+		err := post(ts.URL+"/login", sendData, &actual)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		defer r.Body.Close()
-
-		data, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		var actual domain.Token
-		err = json.Unmarshal(data, &actual)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		token = actual.Token
+		token = actual.Token.Token
 	})
 
 	t.Run("usersFetch", func(t *testing.T) {
-		r, err := http.Get(ts.URL + "/users/fetch?token=" + token)
+		sendData := domain.RecvUsersFetch{
+			Token: token,
+		}
+
+		var actual domain.SendUsersFetch
+
+		err := post(ts.URL+"/users/fetch", sendData, &actual)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		defer r.Body.Close()
-
-		data, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			t.Fatal(err)
+		if len(actual.Users) != 2 {
+			t.Error("Could not match users length", len(actual.Users))
 		}
 
-		users := make([]domain.User, 0)
-		err = json.Unmarshal(data, &users)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if len(users) != 2 {
-			t.Error("Could not match users length", len(users))
-		}
-
-		t.Log(users)
+		t.Log(actual.Users)
 	})
 
 	t.Run("usersGetOwn", func(t *testing.T) {
-		r, err := http.Get(ts.URL + "/users/getown?token=" + token)
+		sendData := domain.RecvUsersGetOwn{
+			Token: token,
+		}
+
+		var actual domain.SendUsersGetOwn
+
+		err := post(ts.URL+"/users/getown", sendData, &actual)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		defer r.Body.Close()
-
-		data, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		var actual domain.User
-		err = json.Unmarshal(data, &actual)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		expect := domain.User{
-			ID:   "test",
-			Name: "test-name",
-			Age:  32,
+		expect := domain.SendUsersGetOwn{
+			Message: "OK",
+			User: domain.User{
+				ID:   "test",
+				Name: "test-name",
+				Age:  32,
+			},
 		}
 
 		if !reflect.DeepEqual(expect, actual) {
 			t.Errorf("Not match response\nexpect: %+v\nactual: %+v", expect, actual)
 		}
 	})
+
+	t.Run("usersUpdate", func(t *testing.T) {
+		t.Run("update", func(t *testing.T) {
+			sendData := domain.RecvUsersUpdate{
+				Token: token,
+				User: domain.User{
+					ID:   "test",
+					Name: "modify-test-name",
+					Age:  100,
+				},
+			}
+
+			var actual domain.SendUsersUpdate
+
+			err := post(ts.URL+"/users/update", sendData, &actual)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			expect := domain.SendUsersUpdate{
+				Message: "OK",
+			}
+
+			if !reflect.DeepEqual(expect, actual) {
+				t.Errorf("Not match response\nexpect: %+v\nactual: %+v", expect, actual)
+			}
+		})
+
+		t.Run("confirm", func(t *testing.T) {
+			sendData := domain.RecvUsersGetOwn{
+				Token: token,
+			}
+
+			var actual domain.SendUsersGetOwn
+
+			err := post(ts.URL+"/users/getown", sendData, &actual)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			expect := domain.SendUsersGetOwn{
+				Message: "OK",
+				User: domain.User{
+					ID:   "test",
+					Name: "modify-test-name",
+					Age:  100,
+				},
+			}
+
+			if !reflect.DeepEqual(expect, actual) {
+				t.Errorf("Not match response\nexpect: %+v\nactual: %+v", expect, actual)
+			}
+		})
+	})
+}
+
+func post(url string, sendData interface{}, response interface{}) error {
+	sendDataB, err := json.Marshal(sendData)
+	if err != nil {
+		return err
+	}
+
+	reader := bytes.NewReader(sendDataB)
+
+	r, err := http.Post(url, "application/json", reader)
+	if err != nil {
+		return err
+	}
+
+	defer r.Body.Close()
+
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(data, response)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -66,6 +66,24 @@ func (u *userUsecase) Fetch(ctx context.Context, token string) ([]domain.User, e
 	return users, nil
 }
 
+func (u *userUsecase) Update(ctx context.Context, token string, user *domain.User) error {
+	t, err := u.tokenRepo.GetByToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	if t.ID != user.ID {
+		return domain.ErrInvalid
+	}
+
+	err = u.userRepo.Update(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *userUsecase) GetOwn(ctx context.Context, token string) (domain.User, error) {
 	t, err := u.tokenRepo.GetByToken(ctx, token)
 	if err != nil {

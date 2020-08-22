@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/rssh-jp/test-mng/api/domain"
@@ -79,6 +80,39 @@ func (r *userRepository) Fetch(ctx context.Context) ([]domain.User, error) {
 	}
 
 	return users, nil
+}
+func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
+	query := `
+        UPDATE
+            users
+        SET
+            name = ?,
+            age = ?
+        WHERE
+            id = ?
+    `
+
+	stmt, err := r.conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	res, err := stmt.ExecContext(ctx, user.Name, user.Age, user.ID)
+	if err != nil {
+		return err
+	}
+
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affect != 1 {
+		err := fmt.Errorf("Weird Behavior. Total Affectred: %d", affect)
+		return err
+	}
+
+	return nil
 }
 func (r *userRepository) GetByIDPassword(ctx context.Context, id, password string) (domain.User, error) {
 	query := `
